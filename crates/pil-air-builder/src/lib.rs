@@ -10,25 +10,28 @@ use symbolic_expression::SymbolicExpression;
 use symbolic_variable::{Entry, SymbolicVariable};
 
 pub fn get_pil<F: Field>(
+    name: &str,
     ab: SymbolicAirBuilder<F>,
     columns: Vec<String>,
     public_values: Vec<String>,
 ) -> String {
-    let mut pil = "
-col fixed is_first_row = [1] + [0]*;
-col fixed is_last_row = [0] + [1]*;
-col fixed is_transition = [0] + [1]* + [0];
+    let mut pil = format!(
+        "
+namespace {name};
+    col fixed is_first_row = [1] + [0]*;
+    col fixed is_last_row = [0] + [1]*;
+    col fixed is_transition = [0] + [1]* + [0];
 "
-    .to_string();
+    );
 
     // Declare witness columns
     for column in &columns {
-        pil.push_str(&format!("col witness {column};\n"));
+        pil.push_str(&format!("    col witness {column};\n"));
     }
 
     for constraint in &ab.constraints {
         // println!("{}", format_expr(constraint, &columns));
-        pil.push_str(&format!("{} = 0;\n", format_expr(constraint, &columns, &public_values)));
+        pil.push_str(&format!("    {} = 0;\n", format_expr(constraint, &columns, &public_values)));
     }
     pil
 }

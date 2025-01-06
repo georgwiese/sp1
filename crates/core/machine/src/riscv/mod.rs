@@ -385,22 +385,31 @@ impl<F: PrimeField32> RiscvAir<F> {
         let public_value_names = PublicValuesWithWords::<u32>::flatten_fields().unwrap();
         assert_eq!(public_value_names.len(), SP1_PROOF_NUM_PV_ELTS);
 
-        for chip in &chips {
-            let columns = chip.columns();
-            if !columns.is_empty() {
-                assert_eq!(columns.len(), chip.width());
-                println!("PIL for {}:", chip.name());
-                let mut ab = SymbolicAirBuilder::new(
-                    chip.preprocessed_width(),
-                    chip.width(),
-                    SP1_PROOF_NUM_PV_ELTS,
-                );
-                chip.air.eval(&mut ab);
-                let pil = get_pil(ab, columns, public_value_names.clone());
-                println!("{}", pil);
-            }
-        }
+        let mut success_count = 0;
+        let pil = chips
+            .iter()
+            .map(|chip| {
+                let columns = chip.columns();
+                if !columns.is_empty() {
+                    success_count += 1;
+                    assert_eq!(columns.len(), chip.width());
+                    let mut ab = SymbolicAirBuilder::new(
+                        chip.preprocessed_width(),
+                        chip.width(),
+                        SP1_PROOF_NUM_PV_ELTS,
+                    );
+                    chip.air.eval(&mut ab);
+                    get_pil(&chip.name(), ab, columns, public_value_names.clone())
+                } else {
+                    format!("namespace {};\n    // TODO", chip.name())
+                }
+            })
+            .join("\n\n\n");
 
+        println!("Generated PIL for {success_count} / {} chips", chips.len());
+
+        std::fs::write("sp1.pil", pil).unwrap();
+        println!("PIL written to sp1.pil");
         (chips, costs)
     }
 

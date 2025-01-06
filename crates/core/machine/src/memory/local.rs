@@ -50,7 +50,7 @@ struct SingleMemoryLocal<T> {
     pub is_real: T,
 }
 
-#[derive(AlignedBorrow, Debug, Clone, Copy)]
+#[derive(AlignedBorrow, Debug, Clone, Copy, FlattenFields)]
 #[repr(C)]
 pub struct MemoryLocalCols<T> {
     memory_local_entries: [SingleMemoryLocal<T>; NUM_LOCAL_MEMORY_ENTRIES_PER_ROW],
@@ -78,6 +78,10 @@ impl<F: PrimeField32> MachineAir<F> for MemoryLocalChip {
 
     fn name(&self) -> String {
         "MemoryLocal".to_string()
+    }
+
+    fn columns(&self) -> Vec<String> {
+        MemoryLocalCols::<F>::flatten_fields().unwrap()
     }
 
     fn generate_dependencies(&self, _input: &ExecutionRecord, _output: &mut ExecutionRecord) {
