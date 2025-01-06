@@ -4,7 +4,6 @@ use proc_macro::TokenStream;
 use quote::quote;
 use sp1_columns_core::FlattenFieldsHelper;
 use syn::{parse_macro_input, Data, DeriveInput, Fields};
-
 #[proc_macro_derive(FlattenFields)]
 pub fn flatten_fields(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
@@ -13,6 +12,9 @@ pub fn flatten_fields(input: TokenStream) -> TokenStream {
     let generics = input.generics;
     let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
 
+    // Get the generic type `T` if it exists
+    let generic_type = generics.type_params().next().expect("Expected a generic parameter");
+
     let field_list_code = match input.data {
         Data::Struct(data_struct) => match data_struct.fields {
             Fields::Named(fields) => {
@@ -20,6 +22,17 @@ pub fn flatten_fields(input: TokenStream) -> TokenStream {
                     let field_name = field.ident.as_ref().unwrap().to_string();
                     let field_type = &field.ty;
 
+                    // Check if the field type is the same as the generic type `T`
+                    if let syn::Type::Path(type_path) = field_type {
+                        if type_path.path.is_ident(&generic_type.ident) {
+                            // This field is of type `T`, treat it as a terminal field
+                            return quote! {
+                                fields.push(#field_name.to_string());
+                            };
+                        }
+                    }
+
+                    // For non-generic types, use the existing logic
                     quote! {
                         if <#field_type as FlattenFieldsHelper>::flatten_fields().is_some() {
                             if let Some(sub_fields) = <#field_type as FlattenFieldsHelper>::flatten_fields() {
@@ -38,6 +51,17 @@ pub fn flatten_fields(input: TokenStream) -> TokenStream {
                     let index = syn::Index::from(i);
                     let field_type = &field.ty;
 
+                    // Check if the field type is the same as the generic type `T`
+                    if let syn::Type::Path(type_path) = field_type {
+                        if type_path.path.is_ident(&generic_type.ident) {
+                            // This field is of type `T`, treat it as a terminal field
+                            return quote! {
+                                fields.push(format!("{}", #index));
+                            };
+                        }
+                    }
+
+                    // For non-generic types, use the existing logic
                     quote! {
                         if <#field_type as FlattenFieldsHelper>::flatten_fields().is_some() {
                             if let Some(sub_fields) = <#field_type as FlattenFieldsHelper>::flatten_fields() {

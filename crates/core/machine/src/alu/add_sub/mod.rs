@@ -39,7 +39,7 @@ pub const NUM_ADD_SUB_COLS: usize = size_of::<AddSubCols<u8>>();
 pub struct AddSubChip;
 
 /// The column layout for the chip.
-#[derive(AlignedBorrow, Default, Clone, Copy)]
+#[derive(AlignedBorrow, Default, Clone, Copy, FlattenFields)]
 #[repr(C)]
 pub struct AddSubCols<T> {
     /// The shard number, used for byte lookup table.
@@ -74,9 +74,9 @@ impl<F: PrimeField> MachineAir<F> for AddSubChip {
         "AddSub".to_string()
     }
 
-    // fn columns(&self) -> Vec<String> {
-    //     AddSubCols::<F>::fields().iter().map(|f| f.to_string()).collect()
-    // }
+    fn columns(&self) -> Vec<String> {
+        AddSubCols::<F>::flatten_fields().unwrap()
+    }
 
     fn generate_trace(
         &self,
