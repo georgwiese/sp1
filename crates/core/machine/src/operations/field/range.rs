@@ -10,12 +10,14 @@ use num::BigUint;
 
 use p3_air::AirBuilder;
 use p3_field::{AbstractField, PrimeField32};
+use sp1_columns::FlattenFields;
+use sp1_columns_core::FlattenFieldsHelper;
 use sp1_curves::params::{FieldParameters, Limbs};
 
 use sp1_derive::AlignedBorrow;
 
 /// Operation columns for verifying that `lhs < rhs`.
-#[derive(Debug, Clone, AlignedBorrow)]
+#[derive(Debug, Clone, AlignedBorrow, FlattenFields)]
 #[repr(C)]
 pub struct FieldLtCols<T, P: FieldParameters> {
     /// Boolean flags to indicate the first byte in which the element is smaller than the modulus.

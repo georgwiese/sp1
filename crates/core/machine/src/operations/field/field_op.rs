@@ -33,7 +33,7 @@ use typenum::Unsigned;
 ///
 /// **Warning**: The constraints do not check for division by zero. The caller is responsible for
 /// ensuring that the division operation is valid.
-#[derive(Debug, Clone, AlignedBorrow)]
+#[derive(Debug, Clone, AlignedBorrow, FlattenFields)]
 #[repr(C)]
 pub struct FieldOpCols<T, P: FieldParameters> {
     /// The result of `a op b`, where a, b are field elements
