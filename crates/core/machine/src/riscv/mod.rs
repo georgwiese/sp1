@@ -6,10 +6,12 @@ use itertools::Itertools;
 use p3_air::Air;
 use p3_air::BaseAir;
 pub use shape::*;
+use sp1_columns_core::FlattenFieldsHelper;
 use sp1_core_executor::{
     events::PrecompileLocalMemory, syscalls::SyscallCode, ExecutionRecord, Program,
 };
 use sp1_pil_air_builder::get_pil;
+use sp1_stark::air::PublicValuesWithWords;
 
 use crate::{
     memory::{
@@ -380,6 +382,9 @@ impl<F: PrimeField32> RiscvAir<F> {
         costs.insert(RiscvAirDiscriminants::ByteLookup, byte.cost());
         chips.push(byte);
 
+        let public_value_names = PublicValuesWithWords::<u32>::flatten_fields().unwrap();
+        assert_eq!(public_value_names.len(), SP1_PROOF_NUM_PV_ELTS);
+
         for chip in &chips {
             let columns = chip.columns();
             if !columns.is_empty() {
@@ -391,7 +396,7 @@ impl<F: PrimeField32> RiscvAir<F> {
                     SP1_PROOF_NUM_PV_ELTS,
                 );
                 chip.air.eval(&mut ab);
-                let pil = get_pil(columns, ab);
+                let pil = get_pil(ab, columns, public_value_names.clone());
                 println!("{}", pil);
             }
         }

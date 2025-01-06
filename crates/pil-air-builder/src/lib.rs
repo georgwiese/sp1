@@ -9,7 +9,11 @@ pub use symbolic_builder::*;
 use symbolic_expression::SymbolicExpression;
 use symbolic_variable::{Entry, SymbolicVariable};
 
-pub fn get_pil<F: Field>(columns: Vec<String>, ab: SymbolicAirBuilder<F>) -> String {
+pub fn get_pil<F: Field>(
+    ab: SymbolicAirBuilder<F>,
+    columns: Vec<String>,
+    public_values: Vec<String>,
+) -> String {
     let mut pil = "
 col fixed is_first_row = [1] + [0]*;
 col fixed is_last_row = [0] + [1]*;
@@ -24,12 +28,16 @@ col fixed is_transition = [0] + [1]* + [0];
 
     for constraint in &ab.constraints {
         // println!("{}", format_expr(constraint, &columns));
-        pil.push_str(&format!("{} = 0;\n", format_expr(constraint, &columns)));
+        pil.push_str(&format!("{} = 0;\n", format_expr(constraint, &columns, &public_values)));
     }
     pil
 }
 
-fn format_expr<F: Field>(expr: &SymbolicExpression<F>, columns: &[String]) -> String {
+fn format_expr<F: Field>(
+    expr: &SymbolicExpression<F>,
+    columns: &[String],
+    public_values: &[String],
+) -> String {
     match expr {
         SymbolicExpression::Variable(SymbolicVariable { entry, index, _phantom }) => {
             let offset_str = |offset| match offset {
@@ -48,7 +56,15 @@ fn format_expr<F: Field>(expr: &SymbolicExpression<F>, columns: &[String]) -> St
                     format!("{column_name}{}", offset_str(*offset))
                 }
                 Entry::Permutation { .. } => unimplemented!(),
-                Entry::Public => format!(":public_{index}"),
+                Entry::Public => {
+                    let public_value = public_values.get(*index).unwrap_or_else(|| {
+                        panic!(
+                            "Public value index out of bounds: {}\nPublic values: {:?}",
+                            index, public_values
+                        )
+                    });
+                    format!(":{public_value}")
+                }
                 Entry::Challenge => unimplemented!(),
             }
         }
@@ -56,15 +72,29 @@ fn format_expr<F: Field>(expr: &SymbolicExpression<F>, columns: &[String]) -> St
         SymbolicExpression::IsLastRow => "is_last_row".to_string(),
         SymbolicExpression::IsTransition => "is_transition".to_string(),
         SymbolicExpression::Constant(c) => format!("{}", c),
-        SymbolicExpression::Add { x, y, degree_multiple } => {
-            format!("({} + {})", format_expr(x, columns), format_expr(y, columns))
+        SymbolicExpression::Add { x, y, .. } => {
+            format!(
+                "({} + {})",
+                format_expr(x, columns, public_values),
+                format_expr(y, columns, public_values)
+            )
         }
-        SymbolicExpression::Sub { x, y, degree_multiple } => {
-            format!("({} - {})", format_expr(x, columns), format_expr(y, columns))
+        SymbolicExpression::Sub { x, y, .. } => {
+            format!(
+                "({} - {})",
+                format_expr(x, columns, public_values),
+                format_expr(y, columns, public_values)
+            )
         }
-        SymbolicExpression::Neg { x, degree_multiple } => format!("(-{})", format_expr(x, columns)),
-        SymbolicExpression::Mul { x, y, degree_multiple } => {
-            format!("({} * {})", format_expr(x, columns), format_expr(y, columns))
+        SymbolicExpression::Neg { x, .. } => {
+            format!("(-{})", format_expr(x, columns, public_values))
+        }
+        SymbolicExpression::Mul { x, y, .. } => {
+            format!(
+                "({} * {})",
+                format_expr(x, columns, public_values),
+                format_expr(y, columns, public_values)
+            )
         }
     }
 }
