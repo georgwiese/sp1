@@ -3,6 +3,8 @@ use std::fmt::Debug;
 use num::{BigUint, Zero};
 use p3_air::AirBuilder;
 use p3_field::{AbstractField, PrimeField32};
+use sp1_columns::FlattenFields;
+use sp1_columns_core::FlattenFieldsHelper;
 use sp1_core_executor::events::ByteRecord;
 use sp1_curves::params::{FieldParameters, Limbs};
 use sp1_derive::AlignedBorrow;

@@ -23,6 +23,11 @@ impl<F: Field> MachineAir<F> for ByteChip<F> {
         "Byte".to_string()
     }
 
+    fn columns(&self) -> Vec<String> {
+        // TODO
+        vec![]
+    }
+
     fn preprocessed_width(&self) -> usize {
         NUM_BYTE_PREPROCESSED_COLS
     }

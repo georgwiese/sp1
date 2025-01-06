@@ -8,6 +8,9 @@ use sp1_curves::params::{FieldParameters, Limbs};
 use sp1_derive::AlignedBorrow;
 use sp1_stark::air::{Polynomial, SP1AirBuilder};
 
+use sp1_columns::FlattenFields;
+use sp1_columns_core::FlattenFieldsHelper;
+
 use super::{
     util::{compute_root_quotient_and_shift, split_u16_limbs_to_u8_limbs},
     util_air::eval_field_operation,
@@ -196,6 +199,10 @@ mod tests {
 
         fn name(&self) -> String {
             "FieldDen".to_string()
+        }
+
+        fn columns(&self) -> Vec<String> {
+            FieldDenCols::flatten_fields().unwrap()
         }
 
         fn generate_trace(

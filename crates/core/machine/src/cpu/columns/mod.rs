@@ -17,6 +17,8 @@ pub use opcode::*;
 pub use opcode_specific::*;
 
 use p3_util::indices_arr;
+use sp1_columns::FlattenFields;
+use sp1_columns_core::FlattenFieldsHelper;
 use sp1_derive::AlignedBorrow;
 use sp1_stark::Word;
 use std::mem::{size_of, transmute};

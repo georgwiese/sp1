@@ -53,6 +53,8 @@ use p3_air::{Air, AirBuilder, BaseAir};
 use p3_field::{AbstractField, PrimeField};
 use p3_matrix::{dense::RowMajorMatrix, Matrix};
 use p3_maybe_rayon::prelude::{ParallelBridge, ParallelIterator, ParallelSlice};
+use sp1_columns::FlattenFields;
+use sp1_columns_core::FlattenFieldsHelper;
 use sp1_core_executor::{
     events::{AluEvent, ByteLookupEvent, ByteRecord},
     ByteOpcode, ExecutionRecord, Opcode, Program,
@@ -82,7 +84,7 @@ const BYTE_SIZE: usize = 8;
 pub struct ShiftRightChip;
 
 /// The column layout for the chip.
-#[derive(AlignedBorrow, Default, Debug, Clone, Copy)]
+#[derive(AlignedBorrow, Default, Debug, Clone, Copy, FlattenFields)]
 #[repr(C)]
 pub struct ShiftRightCols<T> {
     /// The shard number, used for byte lookup table.
@@ -141,6 +143,10 @@ impl<F: PrimeField> MachineAir<F> for ShiftRightChip {
 
     fn name(&self) -> String {
         "ShiftRight".to_string()
+    }
+
+    fn columns(&self) -> Vec<String> {
+        ShiftRightCols::<F>::flatten_fields().unwrap()
     }
 
     fn generate_trace(

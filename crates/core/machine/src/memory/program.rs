@@ -70,6 +70,11 @@ impl<F: PrimeField> MachineAir<F> for MemoryProgramChip {
         "MemoryProgram".to_string()
     }
 
+    fn columns(&self) -> Vec<String> {
+        // TODO
+        vec![]
+    }
+
     fn preprocessed_width(&self) -> usize {
         NUM_MEMORY_PROGRAM_PREPROCESSED_COLS
     }

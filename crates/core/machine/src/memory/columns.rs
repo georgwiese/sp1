@@ -1,15 +1,17 @@
+use sp1_columns::FlattenFields;
+use sp1_columns_core::FlattenFieldsHelper;
 use sp1_derive::AlignedBorrow;
 use sp1_stark::Word;
 
 /// Memory read access.
-#[derive(AlignedBorrow, Default, Debug, Clone, Copy)]
+#[derive(AlignedBorrow, Default, Debug, Clone, Copy, FlattenFields)]
 #[repr(C)]
 pub struct MemoryReadCols<T> {
     pub access: MemoryAccessCols<T>,
 }
 
 /// Memory write access.
-#[derive(AlignedBorrow, Default, Debug, Clone, Copy)]
+#[derive(AlignedBorrow, Default, Debug, Clone, Copy, FlattenFields)]
 #[repr(C)]
 pub struct MemoryWriteCols<T> {
     pub prev_value: Word<T>,
@@ -17,14 +19,14 @@ pub struct MemoryWriteCols<T> {
 }
 
 /// Memory read-write access.
-#[derive(AlignedBorrow, Default, Debug, Clone, Copy)]
+#[derive(AlignedBorrow, Default, Debug, Clone, Copy, FlattenFields)]
 #[repr(C)]
 pub struct MemoryReadWriteCols<T> {
     pub prev_value: Word<T>,
     pub access: MemoryAccessCols<T>,
 }
 
-#[derive(AlignedBorrow, Default, Debug, Clone, Copy)]
+#[derive(AlignedBorrow, Default, Debug, Clone, Copy, FlattenFields)]
 #[repr(C)]
 pub struct MemoryAccessCols<T> {
     /// The value of the memory access.

@@ -24,6 +24,7 @@ pub const NB_BITS_PER_LIMB: usize = 8;
 /// witness limbs associated in NumLimbs / FieldParameters.
 /// See: https://github.com/RustCrypto/traits/issues/1481
 #[derive(Debug, Clone)]
+// TODO: Implement for GenericArray
 pub struct Limbs<T, N: ArrayLength>(pub GenericArray<T, N>);
 
 pub trait FieldParameters:

@@ -23,6 +23,7 @@ col fixed is_transition = [0] + [1]* + [0];
     }
 
     for constraint in &ab.constraints {
+        // println!("{}", format_expr(constraint, &columns));
         pil.push_str(&format!("{} = 0;\n", format_expr(constraint, &columns)));
     }
     pil
@@ -45,7 +46,7 @@ fn format_expr<F: Field>(expr: &SymbolicExpression<F>, columns: &[String]) -> St
                 }
                 Entry::Main { offset } => format!("{column_name}{}", offset_str(*offset)),
                 Entry::Permutation { .. } => unimplemented!(),
-                Entry::Public => unimplemented!(),
+                Entry::Public => format!(":public_{index}"),
                 Entry::Challenge => unimplemented!(),
             }
         }

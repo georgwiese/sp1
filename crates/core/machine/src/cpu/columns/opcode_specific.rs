@@ -10,6 +10,7 @@ use super::ecall::EcallCols;
 
 pub const NUM_OPCODE_SPECIFIC_COLS: usize = size_of::<OpcodeSpecificCols<u8>>();
 
+// TODO
 /// Shared columns whose interpretation depends on the instruction being executed.
 #[derive(Clone, Copy)]
 #[repr(C)]

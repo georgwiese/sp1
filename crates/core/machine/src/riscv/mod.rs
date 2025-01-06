@@ -387,8 +387,7 @@ impl<F: PrimeField32> RiscvAir<F> {
                 let mut ab = SymbolicAirBuilder::new(
                     chip.preprocessed_width(),
                     chip.width(),
-                    // TODO: Publics
-                    0,
+                    SP1_PROOF_NUM_PV_ELTS,
                 );
                 chip.air.eval(&mut ab);
                 let pil = get_pil(columns, ab);
