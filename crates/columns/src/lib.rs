@@ -1,0 +1,70 @@
+extern crate proc_macro;
+
+use proc_macro::TokenStream;
+use quote::quote;
+use sp1_columns_core::FlattenFieldsHelper;
+use syn::{parse_macro_input, Data, DeriveInput, Fields};
+
+#[proc_macro_derive(FlattenFields)]
+pub fn flatten_fields(input: TokenStream) -> TokenStream {
+    let input = parse_macro_input!(input as DeriveInput);
+
+    let struct_name = input.ident;
+    let generics = input.generics;
+    let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
+
+    let field_list_code = match input.data {
+        Data::Struct(data_struct) => match data_struct.fields {
+            Fields::Named(fields) => {
+                fields.named.iter().map(|field| {
+                    let field_name = field.ident.as_ref().unwrap().to_string();
+                    let field_type = &field.ty;
+
+                    quote! {
+                        if <#field_type as FlattenFieldsHelper>::flatten_fields().is_some() {
+                            if let Some(sub_fields) = <#field_type as FlattenFieldsHelper>::flatten_fields() {
+                                for sub_field in sub_fields {
+                                    fields.push(format!("{}__{}", #field_name, sub_field));
+                                }
+                            }
+                        } else {
+                            fields.push(#field_name.to_string());
+                        }
+                    }
+                }).collect::<Vec<_>>()
+            }
+            Fields::Unnamed(fields) => {
+                fields.unnamed.iter().enumerate().map(|(i, field)| {
+                    let index = syn::Index::from(i);
+                    let field_type = &field.ty;
+
+                    quote! {
+                        if <#field_type as FlattenFieldsHelper>::flatten_fields().is_some() {
+                            if let Some(sub_fields) = <#field_type as FlattenFieldsHelper>::flatten_fields() {
+                                for sub_field in sub_fields {
+                                    fields.push(format!("{}__{}", #index, sub_field));
+                                }
+                            }
+                        } else {
+                            fields.push(format!("{}", #index));
+                        }
+                    }
+                }).collect::<Vec<_>>()
+            }
+            Fields::Unit => vec![],
+        },
+        _ => panic!("FlattenFields can only be used on structs."),
+    };
+
+    let expanded = quote! {
+        impl #impl_generics FlattenFieldsHelper for #struct_name #ty_generics #where_clause {
+            fn flatten_fields() -> Option<Vec<String>> {
+                let mut fields = Vec::new();
+                #(#field_list_code)*
+                Some(fields)
+            }
+        }
+    };
+
+    TokenStream::from(expanded)
+}
