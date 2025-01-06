@@ -6038,6 +6038,8 @@ dependencies = [
  "p3-field",
  "serde",
  "snowbridge-amcl",
+ "sp1-columns",
+ "sp1-columns-core",
  "sp1-primitives",
  "sp1-stark",
  "typenum",

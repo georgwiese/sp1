@@ -23,6 +23,8 @@ elliptic-curve = "0.13.8"
 dashu = "0.4.2"
 
 sp1-stark = { workspace = true }
+sp1-columns = { workspace = true }
+sp1-columns-core = { workspace = true }
 
 sp1-primitives = { workspace = true }
 p3-field = { workspace = true }
