@@ -190,6 +190,10 @@ where
         self.air.name()
     }
 
+    fn columns(&self) -> Vec<String> {
+        self.air.columns()
+    }
+
     fn preprocessed_width(&self) -> usize {
         <A as MachineAir<F>>::preprocessed_width(&self.air)
     }

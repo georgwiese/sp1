@@ -376,6 +376,11 @@ impl<F: PrimeField32> RiscvAir<F> {
         costs.insert(RiscvAirDiscriminants::ByteLookup, byte.cost());
         chips.push(byte);
 
+        for chip in &chips {
+            println!("{}", chip.name());
+            println!("  Columns: {:?}", chip.columns());
+        }
+
         (chips, costs)
     }
 

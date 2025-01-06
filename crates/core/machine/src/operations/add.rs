@@ -67,7 +67,6 @@ impl<F: Field> AddOperation<F> {
         cols: AddOperation<AB::Var>,
         is_real: AB::Expr,
     ) {
-        println!("{:?}", AddOperation::<AB::Var>::flatten_fields());
         let one = AB::Expr::one();
         let base = AB::F::from_canonical_u32(256);
 

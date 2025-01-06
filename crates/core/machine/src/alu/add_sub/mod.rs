@@ -9,6 +9,8 @@ use p3_air::{Air, AirBuilder, BaseAir};
 use p3_field::{AbstractField, PrimeField};
 use p3_matrix::{dense::RowMajorMatrix, Matrix};
 use p3_maybe_rayon::prelude::{ParallelBridge, ParallelIterator};
+use sp1_columns::FlattenFields;
+use sp1_columns_core::FlattenFieldsHelper;
 use sp1_core_executor::{
     events::{AluEvent, ByteLookupEvent, ByteRecord},
     ExecutionRecord, Opcode, Program,
@@ -71,6 +73,10 @@ impl<F: PrimeField> MachineAir<F> for AddSubChip {
     fn name(&self) -> String {
         "AddSub".to_string()
     }
+
+    // fn columns(&self) -> Vec<String> {
+    //     AddSubCols::<F>::fields().iter().map(|f| f.to_string()).collect()
+    // }
 
     fn generate_trace(
         &self,
