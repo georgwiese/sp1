@@ -4,6 +4,9 @@ use proc_macro::TokenStream;
 use quote::quote;
 use sp1_columns_core::FlattenFieldsHelper;
 use syn::{parse_macro_input, Data, DeriveInput, Fields};
+
+// Author: ChatGPT
+
 #[proc_macro_derive(FlattenFields)]
 pub fn flatten_fields(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
@@ -32,7 +35,40 @@ pub fn flatten_fields(input: TokenStream) -> TokenStream {
                         }
                     }
 
-                    // For non-generic types, use the existing logic
+                    // Handle array types `[T; N]`
+                    if let syn::Type::Array(array_type) = field_type {
+                        let elem_type = &*array_type.elem; // Dereference the Box to get the inner type
+                        let array_len = &array_type.len;
+
+                        // Check if the array element type is `T`
+                        if let syn::Type::Path(type_path) = elem_type {
+                            if type_path.path.is_ident(&generic_type.ident) {
+                                // Array of `T`, treat as terminal
+                                return quote! {
+                                    for i in 0..#array_len {
+                                        fields.push(format!("{}__{}", #field_name, i));
+                                    }
+                                };
+                            }
+                        }
+
+                        // Otherwise, recursively process the array elements
+                        return quote! {
+                            if let Some(sub_fields) = <#elem_type as FlattenFieldsHelper>::flatten_fields() {
+                                for i in 0..#array_len {
+                                    for sub_field in &sub_fields {
+                                        fields.push(format!("{}__{}__{}", #field_name, i, sub_field));
+                                    }
+                                }
+                            } else {
+                                for i in 0..#array_len {
+                                    fields.push(format!("{}__{}", #field_name, i));
+                                }
+                            }
+                        };
+                    }
+
+                    // For non-generic, non-array types, use the existing logic
                     quote! {
                         if <#field_type as FlattenFieldsHelper>::flatten_fields().is_some() {
                             if let Some(sub_fields) = <#field_type as FlattenFieldsHelper>::flatten_fields() {
@@ -61,7 +97,40 @@ pub fn flatten_fields(input: TokenStream) -> TokenStream {
                         }
                     }
 
-                    // For non-generic types, use the existing logic
+                    // Handle array types `[T; N]`
+                    if let syn::Type::Array(array_type) = field_type {
+                        let elem_type = &*array_type.elem; // Dereference the Box to get the inner type
+                        let array_len = &array_type.len;
+
+                        // Check if the array element type is `T`
+                        if let syn::Type::Path(type_path) = elem_type {
+                            if type_path.path.is_ident(&generic_type.ident) {
+                                // Array of `T`, treat as terminal
+                                return quote! {
+                                    for i in 0..#array_len {
+                                        fields.push(format!("{}__{}", #index, i));
+                                    }
+                                };
+                            }
+                        }
+
+                        // Otherwise, recursively process the array elements
+                        return quote! {
+                            if let Some(sub_fields) = <#elem_type as FlattenFieldsHelper>::flatten_fields() {
+                                for i in 0..#array_len {
+                                    for sub_field in &sub_fields {
+                                        fields.push(format!("{}__{}__{}", #index, i, sub_field));
+                                    }
+                                }
+                            } else {
+                                for i in 0..#array_len {
+                                    fields.push(format!("{}__{}", #index, i));
+                                }
+                            }
+                        };
+                    }
+
+                    // For non-generic, non-array types, use the existing logic
                     quote! {
                         if <#field_type as FlattenFieldsHelper>::flatten_fields().is_some() {
                             if let Some(sub_fields) = <#field_type as FlattenFieldsHelper>::flatten_fields() {

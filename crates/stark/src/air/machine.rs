@@ -19,6 +19,7 @@ pub trait MachineAir<F: Field>: BaseAir<F> + 'static + Send + Sync {
     /// A unique identifier for this AIR as part of a machine.
     fn name(&self) -> String;
 
+    // fn columns(&self) -> Vec<String>;
     fn columns(&self) -> Vec<String> {
         vec![]
     }

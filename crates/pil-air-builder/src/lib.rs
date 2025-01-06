@@ -2,6 +2,8 @@ mod symbolic_builder;
 mod symbolic_expression;
 mod symbolic_variable;
 
+use core::panic;
+
 use p3_field::Field;
 pub use symbolic_builder::*;
 use symbolic_expression::SymbolicExpression;
@@ -12,7 +14,8 @@ pub fn get_pil<F: Field>(columns: Vec<String>, ab: SymbolicAirBuilder<F>) -> Str
 col fixed is_first_row = [1] + [0]*;
 col fixed is_last_row = [0] + [1]*;
 col fixed is_transition = [0] + [1]* + [0];
-".to_string();
+"
+    .to_string();
 
     // Declare witness columns
     for column in &columns {
@@ -28,7 +31,9 @@ col fixed is_transition = [0] + [1]* + [0];
 fn format_expr<F: Field>(expr: &SymbolicExpression<F>, columns: &[String]) -> String {
     match expr {
         SymbolicExpression::Variable(SymbolicVariable { entry, index, _phantom }) => {
-            let column_name = &columns[*index];
+            let column_name = columns.get(*index).unwrap_or_else(|| {
+                panic!("Column index out of bounds: {}\nColumns: {:?}", index, columns)
+            });
             let offset_str = |offset| match offset {
                 0 => "",
                 1 => "'",

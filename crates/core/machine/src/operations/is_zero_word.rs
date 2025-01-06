@@ -4,6 +4,8 @@
 //! this operation doesn't do a range check.
 use p3_air::AirBuilder;
 use p3_field::Field;
+use sp1_columns::FlattenFields;
+use sp1_columns_core::FlattenFieldsHelper;
 use sp1_derive::AlignedBorrow;
 use sp1_primitives::consts::WORD_SIZE;
 use sp1_stark::{air::SP1AirBuilder, Word};
@@ -11,7 +13,7 @@ use sp1_stark::{air::SP1AirBuilder, Word};
 use super::IsZeroOperation;
 
 /// A set of columns needed to compute whether the given word is 0.
-#[derive(AlignedBorrow, Default, Debug, Clone, Copy)]
+#[derive(AlignedBorrow, Default, Debug, Clone, Copy, FlattenFields)]
 #[repr(C)]
 pub struct IsZeroWordOperation<T> {
     /// `IsZeroOperation` to check if each byte in the input word is zero.
