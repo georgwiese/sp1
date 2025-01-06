@@ -383,6 +383,7 @@ impl<F: PrimeField32> RiscvAir<F> {
         for chip in &chips {
             let columns = chip.columns();
             if !columns.is_empty() {
+                assert_eq!(columns.len(), chip.width());
                 println!("PIL for {}:", chip.name());
                 let mut ab = SymbolicAirBuilder::new(
                     chip.preprocessed_width(),

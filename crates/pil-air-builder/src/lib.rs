@@ -32,9 +32,6 @@ col fixed is_transition = [0] + [1]* + [0];
 fn format_expr<F: Field>(expr: &SymbolicExpression<F>, columns: &[String]) -> String {
     match expr {
         SymbolicExpression::Variable(SymbolicVariable { entry, index, _phantom }) => {
-            let column_name = columns.get(*index).unwrap_or_else(|| {
-                panic!("Column index out of bounds: {}\nColumns: {:?}", index, columns)
-            });
             let offset_str = |offset| match offset {
                 0 => "",
                 1 => "'",
@@ -44,7 +41,12 @@ fn format_expr<F: Field>(expr: &SymbolicExpression<F>, columns: &[String]) -> St
                 Entry::Preprocessed { .. } => {
                     unimplemented!()
                 }
-                Entry::Main { offset } => format!("{column_name}{}", offset_str(*offset)),
+                Entry::Main { offset } => {
+                    let column_name = columns.get(*index).unwrap_or_else(|| {
+                        panic!("Column index out of bounds: {}\nColumns: {:?}", index, columns)
+                    });
+                    format!("{column_name}{}", offset_str(*offset))
+                }
                 Entry::Permutation { .. } => unimplemented!(),
                 Entry::Public => format!(":public_{index}"),
                 Entry::Challenge => unimplemented!(),
