@@ -3,10 +3,13 @@ pub mod cost;
 mod shape;
 
 use itertools::Itertools;
+use p3_air::Air;
+use p3_air::BaseAir;
 pub use shape::*;
 use sp1_core_executor::{
     events::PrecompileLocalMemory, syscalls::SyscallCode, ExecutionRecord, Program,
 };
+use sp1_pil_air_builder::get_pil;
 
 use crate::{
     memory::{
@@ -19,6 +22,7 @@ use hashbrown::{HashMap, HashSet};
 use p3_field::PrimeField32;
 pub use riscv_chips::*;
 use sp1_curves::weierstrass::{bls12_381::Bls12381BaseField, bn254::Bn254BaseField};
+use sp1_pil_air_builder::SymbolicAirBuilder;
 use sp1_stark::{
     air::{InteractionScope, MachineAir, SP1_PROOF_NUM_PV_ELTS},
     Chip, InteractionKind, StarkGenericConfig, StarkMachine,
@@ -377,8 +381,19 @@ impl<F: PrimeField32> RiscvAir<F> {
         chips.push(byte);
 
         for chip in &chips {
-            println!("{}", chip.name());
-            println!("  Columns: {:?}", chip.columns());
+            let columns = chip.columns();
+            if !columns.is_empty() {
+                println!("PIL for {}:", chip.name());
+                let mut ab = SymbolicAirBuilder::new(
+                    chip.preprocessed_width(),
+                    chip.width(),
+                    // TODO: Publics
+                    0,
+                );
+                chip.air.eval(&mut ab);
+                let pil = get_pil(columns, ab);
+                println!("{}", pil);
+            }
         }
 
         (chips, costs)

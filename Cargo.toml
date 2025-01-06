@@ -33,7 +33,7 @@ members = [
   "crates/stark",
   "crates/verifier",
   "crates/zkvm/*",
-  "crates/test-artifacts", "crates/columns_core",
+  "crates/test-artifacts", "crates/columns_core", "crates/pil-air-builder",
 ]
 exclude = ["examples/target"]
 resolver = "2"
@@ -56,6 +56,7 @@ sp1-cli = { path = "crates/cli", version = "3.4.0", default-features = false }
 sp1-core-machine = { path = "crates/core/machine", version = "3.4.0" }
 sp1-core-executor = { path = "crates/core/executor", version = "3.4.0" }
 sp1-columns = { path = "crates/columns", version = "3.4.0" }
+sp1-pil-air-builder = { path = "crates/pil-air-builder", version = "3.4.0" }
 sp1-columns-core = { path = "crates/columns_core", version = "3.4.0" }
 sp1-curves = { path = "crates/curves", version = "3.4.0" }
 sp1-derive = { path = "crates/derive", version = "3.4.0" }
