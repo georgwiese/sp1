@@ -70,9 +70,31 @@ fn generate_field_code(
             if let syn::PathArguments::AngleBracketed(args) =
                 &type_path.path.segments.last().unwrap().arguments
             {
-                let element_type = &args.args[0];
-                let size_type = &args.args[1];
+                let element_type =
+                    match args.args.first().expect("Expected element type in GenericArray") {
+                        syn::GenericArgument::Type(ty) => ty,
+                        _ => panic!("Expected a type as the first argument in GenericArray"),
+                    };
 
+                let size_type =
+                    match args.args.iter().nth(1).expect("Expected size type in GenericArray") {
+                        syn::GenericArgument::Type(ty) => ty,
+                        _ => panic!("Expected a type as the second argument in GenericArray"),
+                    };
+
+                // Check if the element type is `T`
+                if let syn::Type::Path(type_path) = element_type {
+                    if type_path.path.is_ident(&generic_type.ident) {
+                        // Treat the `GenericArray` of `T` as terminal
+                        return quote! {
+                            for i in 0..<#size_type as typenum::Unsigned>::USIZE {
+                                fields.push(format!("{}__{}", #field_name, i));
+                            }
+                        };
+                    }
+                }
+
+                // Recursively process the `GenericArray` elements
                 return quote! {
                     if let Some(sub_fields) = <#element_type as FlattenFieldsHelper>::flatten_fields() {
                         for i in 0..<#size_type as typenum::Unsigned>::USIZE {
@@ -160,6 +182,29 @@ fn generate_unnamed_field_code(
             {
                 let element_type = &args.args[0];
                 let size_type = &args.args[1];
+                let element_type =
+                    match args.args.first().expect("Expected element type in GenericArray") {
+                        syn::GenericArgument::Type(ty) => ty,
+                        _ => panic!("Expected a type as the first argument in GenericArray"),
+                    };
+
+                let size_type =
+                    match args.args.iter().nth(1).expect("Expected size type in GenericArray") {
+                        syn::GenericArgument::Type(ty) => ty,
+                        _ => panic!("Expected a type as the second argument in GenericArray"),
+                    };
+
+                // Check if the element type is `T`
+                if let syn::Type::Path(type_path) = element_type {
+                    if type_path.path.is_ident(&generic_type.ident) {
+                        // Treat the `GenericArray` of `T` as terminal
+                        return quote! {
+                            for i in 0..<#size_type as typenum::Unsigned>::USIZE {
+                                fields.push(format!("{}__{}", #index, i));
+                            }
+                        };
+                    }
+                }
 
                 return quote! {
                     if let Some(sub_fields) = <#element_type as FlattenFieldsHelper>::flatten_fields() {
