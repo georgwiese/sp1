@@ -5,6 +5,8 @@ use sp1_core_executor::{
 };
 use sp1_derive::AlignedBorrow;
 use sp1_primitives::consts::WORD_SIZE;
+use sp1_columns::FlattenFields;
+use sp1_columns_core::FlattenFieldsHelper;
 use sp1_stark::{air::SP1AirBuilder, Word};
 
 use crate::bytes::utils::shr_carry;
@@ -12,7 +14,7 @@ use crate::bytes::utils::shr_carry;
 /// A set of columns needed to compute `>>` of a word with a fixed offset R.
 ///
 /// Note that we decompose shifts into a byte shift and a bit shift.
-#[derive(AlignedBorrow, Default, Debug, Clone, Copy)]
+#[derive(AlignedBorrow, Default, Debug, Clone, Copy, FlattenFields)]
 #[repr(C)]
 pub struct FixedShiftRightOperation<T> {
     /// The output value.

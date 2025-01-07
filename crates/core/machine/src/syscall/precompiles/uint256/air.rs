@@ -102,6 +102,10 @@ impl<F: PrimeField32> MachineAir<F> for Uint256MulChip {
         "Uint256MulMod".to_string()
     }
 
+    fn columns(&self) -> Vec<String> {
+        Uint256MulCols::<u8>::flatten_fields().unwrap()
+    }
+
     fn generate_trace(
         &self,
         input: &ExecutionRecord,

@@ -390,9 +390,9 @@ impl<F: PrimeField32> RiscvAir<F> {
             .iter()
             .map(|chip| {
                 let columns = chip.columns();
-                if !columns.is_empty() {
+                if columns.len() == chip.width() {
+                    assert_eq!(chip.preprocessed_width(), 0);
                     success_count += 1;
-                    assert_eq!(columns.len(), chip.width());
                     let mut ab = SymbolicAirBuilder::new(
                         chip.preprocessed_width(),
                         chip.width(),
@@ -400,8 +400,17 @@ impl<F: PrimeField32> RiscvAir<F> {
                     );
                     chip.air.eval(&mut ab);
                     get_pil(&chip.name(), ab, columns, public_value_names.clone())
-                } else {
+                } else if chip.preprocessed_width() > 0 {
+                    format!("namespace {};\n    // TODO: Preprocessed columns", chip.name())
+                } else if columns.is_empty() {
                     format!("namespace {};\n    // TODO", chip.name())
+                } else {
+                    panic!(
+                        "namespace {};\n    // TODO: Expected {} columns, got {}",
+                        chip.name(),
+                        chip.width(),
+                        columns.len()
+                    )
                 }
             })
             .join("\n\n\n");

@@ -2,6 +2,8 @@ use p3_air::AirBuilder;
 use p3_field::{AbstractField, Field};
 use sp1_derive::AlignedBorrow;
 
+use sp1_columns::FlattenFields;
+use sp1_columns_core::FlattenFieldsHelper;
 use sp1_core_executor::events::ByteRecord;
 use sp1_primitives::consts::WORD_SIZE;
 use sp1_stark::{air::SP1AirBuilder, Word};
@@ -9,7 +11,7 @@ use sp1_stark::{air::SP1AirBuilder, Word};
 use crate::air::WordAirBuilder;
 
 /// A set of columns needed to compute the sum of five words.
-#[derive(AlignedBorrow, Default, Debug, Clone, Copy)]
+#[derive(AlignedBorrow, Default, Debug, Clone, Copy, FlattenFields)]
 #[repr(C)]
 pub struct Add5Operation<T> {
     /// The result of `a + b + c + d + e`.

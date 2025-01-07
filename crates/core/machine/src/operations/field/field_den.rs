@@ -24,7 +24,7 @@ use crate::air::WordAirBuilder;
 ///
 /// *Safety*: the operation assumes that the denominators are never zero. It is the responsibility
 /// of the caller to ensure that condition.
-#[derive(Debug, Clone, AlignedBorrow)]
+#[derive(Debug, Clone, AlignedBorrow, FlattenFields)]
 #[repr(C)]
 pub struct FieldDenCols<T, P: FieldParameters> {
     /// The result of `a den b`, where a, b are field elements

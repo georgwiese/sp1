@@ -11,6 +11,8 @@ use num::{BigUint, Zero};
 use p3_air::{Air, AirBuilder, BaseAir};
 use p3_field::{AbstractField, PrimeField32};
 use p3_matrix::{dense::RowMajorMatrix, Matrix};
+use sp1_columns::FlattenFields;
+use sp1_columns_core::FlattenFieldsHelper;
 use sp1_core_executor::{
     events::{ByteLookupEvent, ByteRecord, FieldOperation, PrecompileEvent},
     syscalls::SyscallCode,
@@ -38,7 +40,7 @@ pub struct FpOpChip<P> {
 }
 
 /// A set of columns for the FpAdd operation.
-#[derive(Debug, Clone, AlignedBorrow)]
+#[derive(Debug, Clone, AlignedBorrow, FlattenFields)]
 #[repr(C)]
 pub struct FpOpCols<T, P: FpOpField> {
     pub is_real: T,
@@ -85,6 +87,10 @@ impl<F: PrimeField32, P: FpOpField> MachineAir<F> for FpOpChip<P> {
             FieldType::Bn254 => "Bn254FpOpAssign".to_string(),
             FieldType::Bls12381 => "Bls12381FpOpAssign".to_string(),
         }
+    }
+
+    fn columns(&self) -> Vec<String> {
+        FpOpCols::<u8, P>::flatten_fields().unwrap()
     }
 
     fn generate_trace(&self, input: &Self::Record, output: &mut Self::Record) -> RowMajorMatrix<F> {

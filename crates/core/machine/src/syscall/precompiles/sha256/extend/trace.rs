@@ -3,6 +3,7 @@ use itertools::Itertools;
 use p3_field::PrimeField32;
 use p3_matrix::{dense::RowMajorMatrix, Matrix};
 use p3_maybe_rayon::prelude::{ParallelIterator, ParallelSlice};
+use sp1_columns_core::FlattenFieldsHelper;
 use sp1_core_executor::{
     events::{ByteLookupEvent, ByteRecord, PrecompileEvent, ShaExtendEvent},
     syscalls::SyscallCode,
@@ -20,6 +21,10 @@ impl<F: PrimeField32> MachineAir<F> for ShaExtendChip {
 
     fn name(&self) -> String {
         "ShaExtend".to_string()
+    }
+
+    fn columns(&self) -> Vec<String> {
+        ShaExtendCols::<F>::flatten_fields().unwrap()
     }
 
     fn generate_trace(

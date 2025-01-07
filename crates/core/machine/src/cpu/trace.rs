@@ -14,6 +14,7 @@ use std::{array, borrow::BorrowMut};
 use p3_field::{PrimeField, PrimeField32};
 use p3_matrix::dense::RowMajorMatrix;
 use p3_maybe_rayon::prelude::{ParallelBridge, ParallelIterator, ParallelSlice};
+use sp1_columns_core::FlattenFieldsHelper;
 use tracing::instrument;
 
 use super::{columns::NUM_CPU_COLS, CpuChip};
@@ -26,6 +27,10 @@ impl<F: PrimeField32> MachineAir<F> for CpuChip {
 
     fn name(&self) -> String {
         "CPU".to_string()
+    }
+
+    fn columns(&self) -> Vec<String> {
+        CpuCols::<F>::flatten_fields().unwrap()
     }
 
     fn generate_trace(

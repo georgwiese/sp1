@@ -10,6 +10,8 @@ use num::{BigUint, One, Zero};
 use p3_air::{Air, AirBuilder, BaseAir};
 use p3_field::{AbstractField, PrimeField32};
 use p3_matrix::{dense::RowMajorMatrix, Matrix};
+use sp1_columns::FlattenFields;
+use sp1_columns_core::FlattenFieldsHelper;
 use sp1_core_executor::{
     events::{ByteRecord, FieldOperation, PrecompileEvent},
     syscalls::SyscallCode,
@@ -43,7 +45,7 @@ pub const fn num_weierstrass_decompress_cols<P: FieldParameters + NumWords>() ->
 
 /// A set of columns to compute `WeierstrassDecompress` that decompresses a point on a Weierstrass
 /// curve.
-#[derive(Debug, Clone, AlignedBorrow)]
+#[derive(Debug, Clone, AlignedBorrow, FlattenFields)]
 #[repr(C)]
 pub struct WeierstrassDecompressCols<T, P: FieldParameters + NumWords> {
     pub is_real: T,
@@ -65,7 +67,7 @@ pub struct WeierstrassDecompressCols<T, P: FieldParameters + NumWords> {
 
 /// A set of columns to compute `WeierstrassDecompress` that decompresses a point on a Weierstrass
 /// curve.
-#[derive(Debug, Clone, AlignedBorrow)]
+#[derive(Debug, Clone, AlignedBorrow, FlattenFields)]
 #[repr(C)]
 pub struct LexicographicChoiceCols<T, P: FieldParameters + NumWords> {
     pub comparison_lt_cols: FieldLtCols<T, P>,
@@ -151,6 +153,18 @@ impl<F: PrimeField32, E: EllipticCurve + WeierstrassParameters> MachineAir<F>
             CurveType::Secp256r1 => "Secp256r1Decompress".to_string(),
             CurveType::Bls12381 => "Bls12381Decompress".to_string(),
             _ => panic!("Unsupported curve"),
+        }
+    }
+
+    fn columns(&self) -> Vec<String> {
+        let base_columns = WeierstrassDecompressCols::<F, E::BaseField>::flatten_fields().unwrap();
+        match self.sign_rule {
+            SignChoiceRule::LeastSignificantBit => base_columns,
+            SignChoiceRule::Lexicographic => {
+                let lexicographic_columns =
+                    LexicographicChoiceCols::<F, E::BaseField>::flatten_fields().unwrap();
+                base_columns.into_iter().chain(lexicographic_columns.into_iter()).collect()
+            }
         }
     }
 
