@@ -18,16 +18,63 @@ pub fn get_pil<F: Field>(
     let mut pil = format!(
         "
 namespace {name};
+    // Preamble
     col fixed is_first_row = [1] + [0]*;
     col fixed is_last_row = [0] + [1]*;
     col fixed is_transition = [0] + [1]* + [0];
+
+    // Bus receives (interaction_id, tuple, multiplicity)
 "
+    );
+
+    for (interaction_id, values, multiplicity) in ab.bus_receives {
+        pil.push_str(&format!(
+            "    std::protocols::bus::bus_receive({}, [{}], {});\n",
+            format_expr(&interaction_id, &columns, &public_values),
+            values
+                .iter()
+                .map(|value| format_expr(value, &columns, &public_values))
+                .collect::<Vec<String>>()
+                .join(", "),
+            format_expr(&multiplicity, &columns, &public_values)
+        ));
+    }
+
+    pil.push_str(
+        "
+    // Bus sends (interaction_id, tuple, multiplicity)
+",
+    );
+
+    for (interaction_id, values, multiplicity) in ab.bus_sends {
+        pil.push_str(&format!(
+            "    std::protocols::bus::bus_send({}, [{}], {});\n",
+            format_expr(&interaction_id, &columns, &public_values),
+            values
+                .iter()
+                .map(|value| format_expr(value, &columns, &public_values))
+                .collect::<Vec<String>>()
+                .join(", "),
+            format_expr(&multiplicity, &columns, &public_values)
+        ));
+    }
+
+    pil.push_str(
+        "
+    // Witness columns
+",
     );
 
     // Declare witness columns
     for column in &columns {
         pil.push_str(&format!("    col witness {column};\n"));
     }
+
+    pil.push_str(
+        "
+    // Constraints
+",
+    );
 
     for constraint in &ab.constraints {
         // println!("{}", format_expr(constraint, &columns));

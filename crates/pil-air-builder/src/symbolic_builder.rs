@@ -3,7 +3,10 @@ use p3_air::{Air, AirBuilder, AirBuilderWithPublicValues, PairBuilder};
 use p3_field::Field;
 use p3_matrix::dense::RowMajorMatrix;
 use p3_util::log2_ceil_usize;
-use sp1_stark::air::EmptyMessageBuilder;
+use sp1_stark::air::AirInteraction;
+use sp1_stark::air::InteractionScope;
+use sp1_stark::air::MessageBuilder;
+use std::iter;
 use tracing::instrument;
 
 // Mostly copied from Plonky3!
@@ -70,6 +73,9 @@ pub struct SymbolicAirBuilder<F: Field> {
     main: RowMajorMatrix<SymbolicVariable<F>>,
     public_values: Vec<SymbolicVariable<F>>,
     pub constraints: Vec<SymbolicExpression<F>>,
+    pub bus_sends: Vec<(SymbolicExpression<F>, Vec<SymbolicExpression<F>>, SymbolicExpression<F>)>,
+    pub bus_receives:
+        Vec<(SymbolicExpression<F>, Vec<SymbolicExpression<F>>, SymbolicExpression<F>)>,
 }
 
 impl<F: Field> SymbolicAirBuilder<F> {
@@ -95,6 +101,8 @@ impl<F: Field> SymbolicAirBuilder<F> {
             main: RowMajorMatrix::new(main_values, width),
             public_values,
             constraints: vec![],
+            bus_sends: vec![],
+            bus_receives: vec![],
         }
     }
 
@@ -147,5 +155,20 @@ impl<F: Field> PairBuilder for SymbolicAirBuilder<F> {
     }
 }
 
-// TODO: What's this and why?
-impl<F: Field> EmptyMessageBuilder for SymbolicAirBuilder<F> {}
+impl<F: Field> MessageBuilder<AirInteraction<SymbolicExpression<F>>> for SymbolicAirBuilder<F> {
+    fn send(&mut self, message: AirInteraction<SymbolicExpression<F>>, _scope: InteractionScope) {
+        let interaction_kind =
+            SymbolicExpression::Constant(F::from_canonical_u64(message.kind as u64));
+        self.bus_sends.push((interaction_kind, message.values, message.multiplicity));
+    }
+
+    fn receive(
+        &mut self,
+        message: AirInteraction<SymbolicExpression<F>>,
+        _scope: InteractionScope,
+    ) {
+        let interaction_kind =
+            SymbolicExpression::Constant(F::from_canonical_u64(message.kind as u64));
+        self.bus_receives.push((interaction_kind, message.values, message.multiplicity));
+    }
+}
