@@ -17,6 +17,8 @@ use num::{BigUint, One, Zero};
 use p3_air::{Air, AirBuilder, BaseAir};
 use p3_field::{AbstractField, PrimeField32};
 use p3_matrix::{dense::RowMajorMatrix, Matrix};
+use sp1_columns::FlattenFields;
+use sp1_columns_core::FlattenFieldsHelper;
 use sp1_core_executor::{
     events::{ByteRecord, FieldOperation, PrecompileEvent},
     syscalls::SyscallCode,
@@ -53,7 +55,7 @@ type WordsFieldElement = <U256Field as NumWords>::WordsFieldElement;
 const WORDS_FIELD_ELEMENT: usize = WordsFieldElement::USIZE;
 
 /// A set of columns for the Uint256Mul operation.
-#[derive(Debug, Clone, AlignedBorrow)]
+#[derive(Debug, Clone, AlignedBorrow, FlattenFields)]
 #[repr(C)]
 pub struct Uint256MulCols<T> {
     /// The shard number of the syscall.
@@ -98,6 +100,10 @@ impl<F: PrimeField32> MachineAir<F> for Uint256MulChip {
 
     fn name(&self) -> String {
         "Uint256MulMod".to_string()
+    }
+
+    fn columns(&self) -> Vec<String> {
+        Uint256MulCols::<u8>::flatten_fields().unwrap()
     }
 
     fn generate_trace(

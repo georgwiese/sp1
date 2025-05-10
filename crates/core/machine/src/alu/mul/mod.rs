@@ -34,12 +34,13 @@ use core::{
     borrow::{Borrow, BorrowMut},
     mem::size_of,
 };
-
 use hashbrown::HashMap;
 use p3_air::{Air, AirBuilder, BaseAir};
 use p3_field::{AbstractField, PrimeField};
 use p3_matrix::{dense::RowMajorMatrix, Matrix};
 use p3_maybe_rayon::prelude::{ParallelBridge, ParallelIterator, ParallelSlice};
+use sp1_columns::FlattenFields;
+use sp1_columns_core::FlattenFieldsHelper;
 use sp1_core_executor::{
     events::{AluEvent, ByteLookupEvent, ByteRecord},
     ByteOpcode, ExecutionRecord, Opcode, Program,
@@ -72,7 +73,7 @@ const BYTE_MASK: u8 = 0xff;
 pub struct MulChip;
 
 /// The column layout for the chip.
-#[derive(AlignedBorrow, Default, Debug, Clone, Copy)]
+#[derive(AlignedBorrow, Default, Debug, Clone, Copy, FlattenFields)]
 #[repr(C)]
 pub struct MulCols<T> {
     /// The shard number, used for byte lookup table.
@@ -131,6 +132,10 @@ impl<F: PrimeField> MachineAir<F> for MulChip {
 
     fn name(&self) -> String {
         "Mul".to_string()
+    }
+
+    fn columns(&self) -> Vec<String> {
+        MulCols::<F>::flatten_fields().unwrap()
     }
 
     fn generate_trace(

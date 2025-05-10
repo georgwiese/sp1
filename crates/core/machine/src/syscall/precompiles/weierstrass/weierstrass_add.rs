@@ -11,6 +11,8 @@ use p3_air::{Air, AirBuilder, BaseAir};
 use p3_field::{AbstractField, PrimeField32};
 use p3_matrix::{dense::RowMajorMatrix, Matrix};
 use p3_maybe_rayon::prelude::{ParallelBridge, ParallelIterator, ParallelSlice};
+use sp1_columns::FlattenFields;
+use sp1_columns_core::FlattenFieldsHelper;
 use sp1_core_executor::{
     events::{
         ByteLookupEvent, ByteRecord, EllipticCurveAddEvent, FieldOperation, PrecompileEvent,
@@ -42,7 +44,7 @@ pub const fn num_weierstrass_add_cols<P: FieldParameters + NumWords>() -> usize 
 ///
 /// Right now the number of limbs is assumed to be a constant, although this could be macro-ed or
 /// made generic in the future.
-#[derive(Debug, Clone, AlignedBorrow)]
+#[derive(Debug, Clone, AlignedBorrow, FlattenFields)]
 #[repr(C)]
 pub struct WeierstrassAddAssignCols<T, P: FieldParameters + NumWords> {
     pub is_real: T,
@@ -155,6 +157,10 @@ impl<F: PrimeField32, E: EllipticCurve + WeierstrassParameters> MachineAir<F>
             CurveType::Bls12381 => "Bls12381AddAssign".to_string(),
             _ => panic!("Unsupported curve"),
         }
+    }
+
+    fn columns(&self) -> Vec<String> {
+        WeierstrassAddAssignCols::<u8, E::BaseField>::flatten_fields().unwrap()
     }
 
     fn generate_dependencies(&self, input: &Self::Record, output: &mut Self::Record) {

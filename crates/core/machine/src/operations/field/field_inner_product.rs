@@ -3,6 +3,8 @@ use std::fmt::Debug;
 use num::{BigUint, Zero};
 use p3_air::AirBuilder;
 use p3_field::{AbstractField, PrimeField32};
+use sp1_columns::FlattenFields;
+use sp1_columns_core::FlattenFieldsHelper;
 use sp1_core_executor::events::ByteRecord;
 use sp1_curves::params::{FieldParameters, Limbs};
 use sp1_derive::AlignedBorrow;
@@ -20,7 +22,7 @@ use crate::air::WordAirBuilder;
 /// `M` is the modulus `P::modulus()` under the assumption that the length of `a` and `b` is small
 /// enough so that the vanishing polynomial has limbs bounded by the witness shift. It is the
 /// responsibility of the caller to ensure that the length of `a` and `b` is small enough.
-#[derive(Debug, Clone, AlignedBorrow)]
+#[derive(Debug, Clone, AlignedBorrow, FlattenFields)]
 #[repr(C)]
 pub struct FieldInnerProductCols<T, P: FieldParameters> {
     /// The result of `a inner product b`, where a, b are field elements

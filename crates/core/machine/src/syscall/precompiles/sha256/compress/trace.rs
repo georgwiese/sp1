@@ -5,6 +5,8 @@ use itertools::Itertools;
 use p3_field::PrimeField32;
 use p3_matrix::{dense::RowMajorMatrix, Matrix};
 use p3_maybe_rayon::prelude::{ParallelIterator, ParallelSlice};
+use sp1_columns::FlattenFields;
+use sp1_columns_core::FlattenFieldsHelper;
 use sp1_core_executor::{
     events::{ByteLookupEvent, ByteRecord, PrecompileEvent, ShaCompressEvent},
     syscalls::SyscallCode,
@@ -25,6 +27,10 @@ impl<F: PrimeField32> MachineAir<F> for ShaCompressChip {
 
     fn name(&self) -> String {
         "ShaCompress".to_string()
+    }
+
+    fn columns(&self) -> Vec<String> {
+        ShaCompressCols::<F>::flatten_fields().unwrap()
     }
 
     fn generate_trace(

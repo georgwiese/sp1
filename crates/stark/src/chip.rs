@@ -18,7 +18,7 @@ use super::{
 /// An Air that encodes lookups based on interactions.
 pub struct Chip<F: Field, A> {
     /// The underlying AIR of the chip for constraint evaluation.
-    air: A,
+    pub air: A,
     /// The interactions that the chip sends.
     sends: Vec<Interaction<F>>,
     /// The interactions that the chip receives.
@@ -188,6 +188,10 @@ where
 
     fn name(&self) -> String {
         self.air.name()
+    }
+
+    fn columns(&self) -> Vec<String> {
+        self.air.columns()
     }
 
     fn preprocessed_width(&self) -> usize {

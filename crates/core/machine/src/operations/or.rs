@@ -1,11 +1,13 @@
 use p3_field::{AbstractField, Field};
+use sp1_columns::FlattenFields;
+use sp1_columns_core::FlattenFieldsHelper;
 use sp1_core_executor::{events::ByteRecord, ByteOpcode, ExecutionRecord};
 use sp1_derive::AlignedBorrow;
 use sp1_primitives::consts::WORD_SIZE;
 use sp1_stark::{air::SP1AirBuilder, Word};
 
 /// A set of columns needed to compute the or of two words.
-#[derive(AlignedBorrow, Default, Debug, Clone, Copy)]
+#[derive(AlignedBorrow, Default, Debug, Clone, Copy, FlattenFields)]
 #[repr(C)]
 pub struct OrOperation<T> {
     /// The result of `x | y`.

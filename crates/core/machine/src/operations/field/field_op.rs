@@ -6,6 +6,8 @@ use num::{BigUint, Zero};
 use p3_air::AirBuilder;
 use p3_field::PrimeField32;
 
+use sp1_columns::FlattenFields;
+use sp1_columns_core::FlattenFieldsHelper;
 use sp1_core_executor::events::{ByteRecord, FieldOperation};
 use sp1_derive::AlignedBorrow;
 use sp1_stark::air::{Polynomial, SP1AirBuilder};
@@ -31,7 +33,7 @@ use typenum::Unsigned;
 ///
 /// **Warning**: The constraints do not check for division by zero. The caller is responsible for
 /// ensuring that the division operation is valid.
-#[derive(Debug, Clone, AlignedBorrow)]
+#[derive(Debug, Clone, AlignedBorrow, FlattenFields)]
 #[repr(C)]
 pub struct FieldOpCols<T, P: FieldParameters> {
     /// The result of `a op b`, where a, b are field elements
@@ -381,6 +383,7 @@ mod tests {
     use num::BigUint;
     use p3_air::BaseAir;
     use p3_field::{Field, PrimeField32};
+    use sp1_columns_core::FlattenFieldsHelper;
     use sp1_core_executor::{ExecutionRecord, Program};
     use sp1_curves::params::FieldParameters;
     use sp1_stark::{
@@ -433,6 +436,10 @@ mod tests {
 
         fn name(&self) -> String {
             format!("FieldOp{:?}", self.operation)
+        }
+
+        fn columns(&self) -> Vec<String> {
+            FieldOpCols::<F, P>::flatten_fields().unwrap()
         }
 
         fn generate_trace(

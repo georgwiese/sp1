@@ -1,11 +1,13 @@
 use p3_field::Field;
+use sp1_columns::FlattenFields;
+use sp1_columns_core::FlattenFieldsHelper;
 use sp1_derive::AlignedBorrow;
 use sp1_stark::{air::SP1AirBuilder, Word};
 
 use super::IsZeroWordOperation;
 
 /// A set of columns needed to compute the equality of two words.
-#[derive(AlignedBorrow, Default, Debug, Clone, Copy)]
+#[derive(AlignedBorrow, Default, Debug, Clone, Copy, FlattenFields)]
 #[repr(C)]
 pub struct IsEqualWordOperation<T> {
     /// An operation to check whether the differences in limbs are all 0 (i.e., `a[0] - b[0]`,

@@ -7,6 +7,8 @@ use std::{
 use p3_air::{Air, BaseAir};
 use p3_field::PrimeField32;
 use p3_matrix::{dense::RowMajorMatrix, Matrix};
+use sp1_columns::FlattenFields;
+use sp1_columns_core::FlattenFieldsHelper;
 use sp1_core_executor::{events::SyscallEvent, ExecutionRecord, Program};
 use sp1_derive::AlignedBorrow;
 use sp1_stark::air::{InteractionScope, MachineAir, SP1AirBuilder};
@@ -42,7 +44,7 @@ impl SyscallChip {
 }
 
 /// The column layout for the chip.
-#[derive(AlignedBorrow, Default, Clone, Copy)]
+#[derive(AlignedBorrow, Default, Clone, Copy, FlattenFields)]
 #[repr(C)]
 pub struct SyscallCols<T> {
     /// The shard number of the syscall.
@@ -72,6 +74,10 @@ impl<F: PrimeField32> MachineAir<F> for SyscallChip {
 
     fn name(&self) -> String {
         format!("Syscall{}", self.shard_kind).to_string()
+    }
+
+    fn columns(&self) -> Vec<String> {
+        SyscallCols::<F>::flatten_fields().unwrap()
     }
 
     fn generate_dependencies(&self, _input: &ExecutionRecord, _output: &mut ExecutionRecord) {

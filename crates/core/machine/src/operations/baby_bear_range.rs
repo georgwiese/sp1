@@ -2,10 +2,12 @@ use std::array;
 
 use p3_air::AirBuilder;
 use p3_field::{AbstractField, Field};
+use sp1_columns::FlattenFields;
+use sp1_columns_core::FlattenFieldsHelper;
 use sp1_derive::AlignedBorrow;
 use sp1_stark::air::SP1AirBuilder;
 
-#[derive(AlignedBorrow, Default, Debug, Clone, Copy)]
+#[derive(AlignedBorrow, Default, Debug, Clone, Copy, FlattenFields)]
 #[repr(C)]
 pub struct BabyBearBitDecomposition<T> {
     /// The bit decoposition of the`value`.

@@ -17,6 +17,8 @@ pub use opcode::*;
 pub use opcode_specific::*;
 
 use p3_util::indices_arr;
+use sp1_columns::FlattenFields;
+use sp1_columns_core::FlattenFieldsHelper;
 use sp1_derive::AlignedBorrow;
 use sp1_stark::Word;
 use std::mem::{size_of, transmute};
@@ -28,7 +30,7 @@ pub const NUM_CPU_COLS: usize = size_of::<CpuCols<u8>>();
 pub const CPU_COL_MAP: CpuCols<usize> = make_col_map();
 
 /// The column layout for the CPU.
-#[derive(AlignedBorrow, Default, Debug, Clone, Copy)]
+#[derive(AlignedBorrow, Default, Debug, Clone, Copy, FlattenFields)]
 #[repr(C)]
 pub struct CpuCols<T: Copy> {
     /// The current shard.

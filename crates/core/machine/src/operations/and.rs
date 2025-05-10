@@ -8,8 +8,11 @@ use sp1_core_executor::{
 use sp1_primitives::consts::WORD_SIZE;
 use sp1_stark::{air::SP1AirBuilder, Word};
 
+use sp1_columns::FlattenFields;
+use sp1_columns_core::FlattenFieldsHelper;
+
 /// A set of columns needed to compute the and of two words.
-#[derive(AlignedBorrow, Default, Debug, Clone, Copy)]
+#[derive(AlignedBorrow, Default, Debug, Clone, Copy, FlattenFields)]
 #[repr(C)]
 pub struct AndOperation<T> {
     /// The result of `x & y`.

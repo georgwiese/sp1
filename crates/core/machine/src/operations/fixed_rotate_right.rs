@@ -1,4 +1,6 @@
 use p3_field::{AbstractField, Field};
+use sp1_columns::FlattenFields;
+use sp1_columns_core::FlattenFieldsHelper;
 use sp1_core_executor::{
     events::{ByteLookupEvent, ByteRecord},
     ByteOpcode,
@@ -12,7 +14,7 @@ use crate::bytes::utils::shr_carry;
 /// A set of columns needed to compute `rotateright` of a word with a fixed offset R.
 ///
 /// Note that we decompose shifts into a byte shift and a bit shift.
-#[derive(AlignedBorrow, Default, Debug, Clone, Copy)]
+#[derive(AlignedBorrow, Default, Debug, Clone, Copy, FlattenFields)]
 #[repr(C)]
 pub struct FixedRotateRightOperation<T> {
     /// The output value.

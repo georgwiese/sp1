@@ -19,6 +19,12 @@ pub trait MachineAir<F: Field>: BaseAir<F> + 'static + Send + Sync {
     /// A unique identifier for this AIR as part of a machine.
     fn name(&self) -> String;
 
+    // SWITCH
+    // fn columns(&self) -> Vec<String>;
+    fn columns(&self) -> Vec<String> {
+        vec![]
+    }
+
     /// Generate the trace for a given execution record.
     ///
     /// - `input` is the execution record containing the events to be written to the trace.

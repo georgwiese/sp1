@@ -9,6 +9,8 @@ use p3_air::{Air, AirBuilder, BaseAir};
 use p3_field::{AbstractField, Field, PrimeField32};
 use p3_matrix::{dense::RowMajorMatrix, Matrix};
 use p3_maybe_rayon::prelude::*;
+use sp1_columns::FlattenFields;
+use sp1_columns_core::FlattenFieldsHelper;
 use sp1_core_executor::{
     events::{AluEvent, ByteLookupEvent, ByteRecord},
     ByteOpcode, ExecutionRecord, Opcode, Program,
@@ -29,7 +31,7 @@ pub const NUM_LT_COLS: usize = size_of::<LtCols<u8>>();
 pub struct LtChip;
 
 /// The column layout for the chip.
-#[derive(AlignedBorrow, Default, Clone, Copy)]
+#[derive(AlignedBorrow, Default, Clone, Copy, FlattenFields)]
 #[repr(C)]
 pub struct LtCols<T> {
     /// The shard number, used for byte lookup table.
@@ -99,6 +101,10 @@ impl<F: PrimeField32> MachineAir<F> for LtChip {
 
     fn name(&self) -> String {
         "Lt".to_string()
+    }
+
+    fn columns(&self) -> Vec<String> {
+        LtCols::<F>::flatten_fields().unwrap()
     }
 
     fn generate_trace(

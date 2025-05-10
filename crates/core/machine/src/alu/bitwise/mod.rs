@@ -9,6 +9,8 @@ use p3_air::{Air, AirBuilder, BaseAir};
 use p3_field::{AbstractField, PrimeField};
 use p3_matrix::{dense::RowMajorMatrix, Matrix};
 use p3_maybe_rayon::prelude::{IntoParallelRefIterator, ParallelIterator, ParallelSlice};
+use sp1_columns::FlattenFields;
+use sp1_columns_core::FlattenFieldsHelper;
 use sp1_core_executor::{
     events::{AluEvent, ByteLookupEvent, ByteRecord},
     ByteOpcode, ExecutionRecord, Opcode, Program,
@@ -29,7 +31,7 @@ pub const NUM_BITWISE_COLS: usize = size_of::<BitwiseCols<u8>>();
 pub struct BitwiseChip;
 
 /// The column layout for the chip.
-#[derive(AlignedBorrow, Default, Clone, Copy)]
+#[derive(AlignedBorrow, Default, Clone, Copy, FlattenFields)]
 #[repr(C)]
 pub struct BitwiseCols<T> {
     /// The shard number, used for byte lookup table.
@@ -64,6 +66,9 @@ impl<F: PrimeField> MachineAir<F> for BitwiseChip {
 
     fn name(&self) -> String {
         "Bitwise".to_string()
+    }
+    fn columns(&self) -> Vec<String> {
+        BitwiseCols::<F>::flatten_fields().unwrap()
     }
 
     fn generate_trace(

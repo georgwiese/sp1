@@ -3,10 +3,15 @@ pub mod cost;
 mod shape;
 
 use itertools::Itertools;
+use p3_air::Air;
+use p3_air::BaseAir;
 pub use shape::*;
+use sp1_columns_core::FlattenFieldsHelper;
 use sp1_core_executor::{
     events::PrecompileLocalMemory, syscalls::SyscallCode, ExecutionRecord, Program,
 };
+use sp1_pil_air_builder::get_pil;
+use sp1_stark::air::PublicValuesWithWords;
 
 use crate::{
     memory::{
@@ -19,6 +24,7 @@ use hashbrown::{HashMap, HashSet};
 use p3_field::PrimeField32;
 pub use riscv_chips::*;
 use sp1_curves::weierstrass::{bls12_381::Bls12381BaseField, bn254::Bn254BaseField};
+use sp1_pil_air_builder::SymbolicAirBuilder;
 use sp1_stark::{
     air::{InteractionScope, MachineAir, SP1_PROOF_NUM_PV_ELTS},
     Chip, InteractionKind, StarkGenericConfig, StarkMachine,
@@ -376,6 +382,43 @@ impl<F: PrimeField32> RiscvAir<F> {
         costs.insert(RiscvAirDiscriminants::ByteLookup, byte.cost());
         chips.push(byte);
 
+        let public_value_names = PublicValuesWithWords::<u32>::flatten_fields().unwrap();
+        assert_eq!(public_value_names.len(), SP1_PROOF_NUM_PV_ELTS);
+
+        let mut success_count = 0;
+        let pil = chips
+            .iter()
+            .map(|chip| {
+                let columns = chip.columns();
+                if columns.len() == chip.width() {
+                    assert_eq!(chip.preprocessed_width(), 0);
+                    success_count += 1;
+                    let mut ab = SymbolicAirBuilder::new(
+                        chip.preprocessed_width(),
+                        chip.width(),
+                        SP1_PROOF_NUM_PV_ELTS,
+                    );
+                    chip.air.eval(&mut ab);
+                    get_pil(&chip.name(), ab, columns, public_value_names.clone())
+                } else if chip.preprocessed_width() > 0 {
+                    format!("namespace {};\n    // TODO: Preprocessed columns", chip.name())
+                } else if columns.is_empty() {
+                    format!("namespace {};\n    // TODO", chip.name())
+                } else {
+                    panic!(
+                        "namespace {};\n    // TODO: Expected {} columns, got {}",
+                        chip.name(),
+                        chip.width(),
+                        columns.len()
+                    )
+                }
+            })
+            .join("\n\n\n");
+
+        println!("Generated PIL for {success_count} / {} chips", chips.len());
+
+        std::fs::write("sp1.pil", pil).unwrap();
+        println!("PIL written to sp1.pil");
         (chips, costs)
     }
 

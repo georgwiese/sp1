@@ -10,6 +10,9 @@ use p3_matrix::{dense::RowMajorMatrix, Matrix};
 use p3_maybe_rayon::prelude::{ParallelBridge, ParallelIterator};
 use sp1_core_executor::{ExecutionRecord, Program};
 use sp1_derive::AlignedBorrow;
+
+use sp1_columns::FlattenFields;
+use sp1_columns_core::FlattenFieldsHelper;
 use sp1_stark::{
     air::{AirInteraction, InteractionScope, MachineAir, SP1AirBuilder},
     InteractionKind, Word,
@@ -19,7 +22,7 @@ pub const NUM_LOCAL_MEMORY_ENTRIES_PER_ROW: usize = 4;
 
 pub(crate) const NUM_MEMORY_LOCAL_INIT_COLS: usize = size_of::<MemoryLocalCols<u8>>();
 
-#[derive(AlignedBorrow, Debug, Clone, Copy)]
+#[derive(AlignedBorrow, Debug, Clone, Copy, FlattenFields)]
 #[repr(C)]
 struct SingleMemoryLocal<T> {
     /// The address of the memory access.
@@ -47,7 +50,7 @@ struct SingleMemoryLocal<T> {
     pub is_real: T,
 }
 
-#[derive(AlignedBorrow, Debug, Clone, Copy)]
+#[derive(AlignedBorrow, Debug, Clone, Copy, FlattenFields)]
 #[repr(C)]
 pub struct MemoryLocalCols<T> {
     memory_local_entries: [SingleMemoryLocal<T>; NUM_LOCAL_MEMORY_ENTRIES_PER_ROW],
@@ -75,6 +78,10 @@ impl<F: PrimeField32> MachineAir<F> for MemoryLocalChip {
 
     fn name(&self) -> String {
         "MemoryLocal".to_string()
+    }
+
+    fn columns(&self) -> Vec<String> {
+        MemoryLocalCols::<F>::flatten_fields().unwrap()
     }
 
     fn generate_dependencies(&self, _input: &ExecutionRecord, _output: &mut ExecutionRecord) {

@@ -149,6 +149,13 @@ pub fn machine_air_derive(input: TokenStream) -> TokenStream {
                 }
             });
 
+            let columns_arms = variants.iter().map(|(variant_name, field)| {
+                let field_ty = &field.ty;
+                quote! {
+                    #name::#variant_name(x) => <#field_ty as sp1_stark::air::MachineAir<F>>::columns(x)
+                }
+            });
+
             let preprocessed_width_arms = variants.iter().map(|(variant_name, field)| {
                 let field_ty = &field.ty;
                 quote! {
@@ -207,6 +214,12 @@ pub fn machine_air_derive(input: TokenStream) -> TokenStream {
                     fn name(&self) -> String {
                         match self {
                             #(#name_arms,)*
+                        }
+                    }
+
+                    fn columns(&self) -> Vec<String> {
+                        match self {
+                            #(#columns_arms,)*
                         }
                     }
 

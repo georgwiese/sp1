@@ -5,8 +5,11 @@ use sp1_derive::AlignedBorrow;
 use sp1_primitives::consts::WORD_SIZE;
 use sp1_stark::{air::SP1AirBuilder, Word};
 
+use sp1_columns::FlattenFields;
+use sp1_columns_core::FlattenFieldsHelper;
+
 /// A set of columns needed to compute the not of a word.
-#[derive(AlignedBorrow, Default, Debug, Clone, Copy)]
+#[derive(AlignedBorrow, Default, Debug, Clone, Copy, FlattenFields)]
 #[repr(C)]
 pub struct NotOperation<T> {
     /// The result of `!x`.

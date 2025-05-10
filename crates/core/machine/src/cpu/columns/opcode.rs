@@ -1,4 +1,6 @@
 use p3_field::PrimeField;
+use sp1_columns::FlattenFields;
+use sp1_columns_core::FlattenFieldsHelper;
 use sp1_core_executor::{Instruction, Opcode};
 use sp1_derive::AlignedBorrow;
 use std::{
@@ -20,7 +22,7 @@ const fn make_selectors_col_map() -> OpcodeSelectorCols<usize> {
 }
 
 /// The column layout for opcode selectors.
-#[derive(AlignedBorrow, Clone, Copy, Default, Debug)]
+#[derive(AlignedBorrow, Clone, Copy, Default, Debug, FlattenFields)]
 #[repr(C)]
 pub struct OpcodeSelectorCols<T> {
     /// Whether op_b is an immediate value.

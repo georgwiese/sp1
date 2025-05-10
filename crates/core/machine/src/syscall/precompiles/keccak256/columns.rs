@@ -1,6 +1,8 @@
 use core::mem::size_of;
 
 use p3_keccak_air::KeccakCols;
+use sp1_columns::FlattenFields;
+use sp1_columns_core::FlattenFieldsHelper;
 use sp1_derive::AlignedBorrow;
 
 use crate::memory::MemoryReadWriteCols;

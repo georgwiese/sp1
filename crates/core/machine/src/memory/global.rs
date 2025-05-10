@@ -7,6 +7,8 @@ use std::array;
 use p3_air::{Air, AirBuilder, BaseAir};
 use p3_field::{AbstractField, PrimeField32};
 use p3_matrix::{dense::RowMajorMatrix, Matrix};
+use sp1_columns::FlattenFields;
+use sp1_columns_core::FlattenFieldsHelper;
 use sp1_core_executor::{events::MemoryInitializeFinalizeEvent, ExecutionRecord, Program};
 use sp1_derive::AlignedBorrow;
 use sp1_stark::{
@@ -52,6 +54,10 @@ impl<F: PrimeField32> MachineAir<F> for MemoryGlobalChip {
             MemoryChipType::Initialize => "MemoryGlobalInit".to_string(),
             MemoryChipType::Finalize => "MemoryGlobalFinalize".to_string(),
         }
+    }
+
+    fn columns(&self) -> Vec<String> {
+        MemoryInitCols::<F>::flatten_fields().unwrap()
     }
 
     fn generate_dependencies(&self, _input: &ExecutionRecord, _output: &mut ExecutionRecord) {
@@ -148,7 +154,7 @@ impl<F: PrimeField32> MachineAir<F> for MemoryGlobalChip {
     }
 }
 
-#[derive(AlignedBorrow, Debug, Clone, Copy)]
+#[derive(AlignedBorrow, Debug, Clone, Copy, FlattenFields)]
 #[repr(C)]
 pub struct MemoryInitCols<T> {
     /// The shard number of the memory access.

@@ -1,4 +1,5 @@
 use crate::cpu::columns::{AuipcCols, BranchCols, JumpCols, MemoryColumns};
+use sp1_columns_core::FlattenFieldsHelper;
 use std::{
     fmt::{Debug, Formatter},
     mem::{size_of, transmute},
@@ -19,6 +20,12 @@ pub union OpcodeSpecificCols<T: Copy> {
     jump: JumpCols<T>,
     auipc: AuipcCols<T>,
     ecall: EcallCols<T>,
+}
+
+impl<T: Copy> FlattenFieldsHelper for OpcodeSpecificCols<T> {
+    fn flatten_fields() -> Option<Vec<String>> {
+        Some((0..NUM_OPCODE_SPECIFIC_COLS).map(|i| format!("opcode_specific_{}", i)).collect())
+    }
 }
 
 impl<T: Copy + Default> Default for OpcodeSpecificCols<T> {

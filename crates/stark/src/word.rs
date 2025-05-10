@@ -6,6 +6,8 @@ use itertools::Itertools;
 use p3_air::AirBuilder;
 use p3_field::{AbstractField, Field};
 use serde::{Deserialize, Serialize};
+use sp1_columns::FlattenFields;
+use sp1_columns_core::FlattenFieldsHelper;
 use sp1_derive::AlignedBorrow;
 use sp1_primitives::consts::WORD_SIZE;
 use std::array::IntoIter;
@@ -15,7 +17,7 @@ use std::array::IntoIter;
 /// We use the generic type `T` to represent the different representations of a byte, ranging from
 /// a `u8` to a `AB::Var` or `AB::Expr`.
 #[derive(
-    AlignedBorrow, Clone, Copy, Debug, Default, PartialEq, Eq, Hash, Serialize, Deserialize,
+    AlignedBorrow, Clone, Copy, Debug, Default, PartialEq, Eq, Hash, Serialize, Deserialize, FlattenFields
 )]
 #[repr(C)]
 pub struct Word<T>(pub [T; WORD_SIZE]);

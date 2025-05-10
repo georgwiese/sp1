@@ -68,6 +68,8 @@ use core::{
 use p3_air::{Air, AirBuilder, BaseAir};
 use p3_field::{AbstractField, PrimeField};
 use p3_matrix::{dense::RowMajorMatrix, Matrix};
+use sp1_columns::FlattenFields;
+use sp1_columns_core::FlattenFieldsHelper;
 use sp1_core_executor::{
     events::{ByteLookupEvent, ByteRecord},
     get_msb, get_quotient_and_remainder, is_signed_operation, ByteOpcode, ExecutionRecord, Opcode,
@@ -97,7 +99,7 @@ const LONG_WORD_SIZE: usize = 2 * WORD_SIZE;
 pub struct DivRemChip;
 
 /// The column layout for the chip.
-#[derive(AlignedBorrow, Default, Debug, Clone, Copy)]
+#[derive(AlignedBorrow, Default, Debug, Clone, Copy, FlattenFields)]
 #[repr(C)]
 pub struct DivRemCols<T> {
     /// The shard number, used for byte lookup table.
@@ -216,6 +218,10 @@ impl<F: PrimeField> MachineAir<F> for DivRemChip {
 
     fn name(&self) -> String {
         "DivRem".to_string()
+    }
+
+    fn columns(&self) -> Vec<String> {
+        DivRemCols::<F>::flatten_fields().unwrap()
     }
 
     fn generate_trace(

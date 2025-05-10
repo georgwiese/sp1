@@ -3,6 +3,8 @@ use itertools::izip;
 use p3_air::AirBuilder;
 use p3_field::{AbstractField, PrimeField32};
 
+use sp1_columns::FlattenFields;
+use sp1_columns_core::FlattenFieldsHelper;
 use sp1_core_executor::{
     events::{ByteLookupEvent, ByteRecord},
     ByteOpcode,
@@ -11,7 +13,7 @@ use sp1_derive::AlignedBorrow;
 use sp1_stark::air::{BaseAirBuilder, SP1AirBuilder};
 
 /// Operation columns for verifying that an element is within the range `[0, modulus)`.
-#[derive(Debug, Clone, Copy, AlignedBorrow)]
+#[derive(Debug, Clone, Copy, AlignedBorrow, FlattenFields)]
 #[repr(C)]
 pub struct AssertLtColsBytes<T, const N: usize> {
     /// Boolean flags to indicate the first byte in which the element is smaller than the modulus.
@@ -130,7 +132,7 @@ impl<V: Copy, const N: usize> AssertLtColsBytes<V, N> {
 }
 
 /// Operation columns for verifying that an element is within the range `[0, modulus)`.
-#[derive(Debug, Clone, Copy, AlignedBorrow)]
+#[derive(Debug, Clone, Copy, AlignedBorrow, FlattenFields)]
 #[repr(C)]
 pub struct AssertLtColsBits<T, const N: usize> {
     /// Boolean flags to indicate the first byte in which the element is smaller than the modulus.

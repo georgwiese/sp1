@@ -9,6 +9,8 @@ use num::{BigUint, One, Zero};
 use p3_air::{Air, AirBuilder, BaseAir};
 use p3_field::{AbstractField, PrimeField32};
 use p3_matrix::{dense::RowMajorMatrix, Matrix};
+use sp1_columns::FlattenFields;
+use sp1_columns_core::FlattenFieldsHelper;
 use sp1_core_executor::{
     events::{ByteRecord, FieldOperation, PrecompileEvent},
     syscalls::SyscallCode,
@@ -46,7 +48,7 @@ const LO_REGISTER: u32 = Register::X12 as u32;
 const HI_REGISTER: u32 = Register::X13 as u32;
 
 /// A set of columns for the U256x2048Mul operation.
-#[derive(Debug, Clone, AlignedBorrow)]
+#[derive(Debug, Clone, AlignedBorrow, FlattenFields)]
 #[repr(C)]
 pub struct U256x2048MulCols<T> {
     /// The shard number of the syscall.
@@ -94,6 +96,10 @@ impl<F: PrimeField32> MachineAir<F> for U256x2048MulChip {
 
     fn name(&self) -> String {
         "U256XU2048Mul".to_string()
+    }
+
+    fn columns(&self) -> Vec<String> {
+        U256x2048MulCols::<u8>::flatten_fields().unwrap()
     }
 
     fn generate_trace(

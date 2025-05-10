@@ -3,7 +3,8 @@ use std::{
     ops::{Div, Index, IndexMut},
     slice::Iter,
 };
-
+use sp1_columns::FlattenFields;
+use sp1_columns_core::FlattenFieldsHelper;
 use serde::{de::DeserializeOwned, Serialize};
 
 use typenum::{Unsigned, U2, U4};
@@ -23,7 +24,8 @@ pub const NB_BITS_PER_LIMB: usize = 8;
 /// GenericArray allows us to constrain the correct array lengths so we can have # of limbs and # of
 /// witness limbs associated in NumLimbs / FieldParameters.
 /// See: https://github.com/RustCrypto/traits/issues/1481
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, FlattenFields)]
+// TODO: Implement for GenericArray
 pub struct Limbs<T, N: ArrayLength>(pub GenericArray<T, N>);
 
 pub trait FieldParameters:

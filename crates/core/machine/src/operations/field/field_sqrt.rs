@@ -6,6 +6,8 @@ use p3_field::PrimeField32;
 use sp1_curves::params::{limbs_from_vec, FieldParameters, Limbs};
 use sp1_derive::AlignedBorrow;
 
+use sp1_columns::FlattenFields;
+use sp1_columns_core::FlattenFieldsHelper;
 use sp1_core_executor::{
     events::{ByteLookupEvent, ByteRecord, FieldOperation},
     ByteOpcode,
@@ -20,7 +22,7 @@ use p3_field::AbstractField;
 ///
 /// *Safety*: The `FieldSqrtCols` asserts that `multiplication.result` is a square root of the given
 /// input lying within the range `[0, modulus)` with the least significant bit `lsb`.
-#[derive(Debug, Clone, AlignedBorrow)]
+#[derive(Debug, Clone, AlignedBorrow, FlattenFields)]
 #[repr(C)]
 pub struct FieldSqrtCols<T, P: FieldParameters> {
     /// The multiplication operation to verify that the sqrt and the input match.

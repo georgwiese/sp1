@@ -8,6 +8,9 @@ use sp1_curves::params::{FieldParameters, Limbs};
 use sp1_derive::AlignedBorrow;
 use sp1_stark::air::{Polynomial, SP1AirBuilder};
 
+use sp1_columns::FlattenFields;
+use sp1_columns_core::FlattenFieldsHelper;
+
 use super::{
     util::{compute_root_quotient_and_shift, split_u16_limbs_to_u8_limbs},
     util_air::eval_field_operation,
@@ -21,7 +24,7 @@ use crate::air::WordAirBuilder;
 ///
 /// *Safety*: the operation assumes that the denominators are never zero. It is the responsibility
 /// of the caller to ensure that condition.
-#[derive(Debug, Clone, AlignedBorrow)]
+#[derive(Debug, Clone, AlignedBorrow, FlattenFields)]
 #[repr(C)]
 pub struct FieldDenCols<T, P: FieldParameters> {
     /// The result of `a den b`, where a, b are field elements
@@ -196,6 +199,10 @@ mod tests {
 
         fn name(&self) -> String {
             "FieldDen".to_string()
+        }
+
+        fn columns(&self) -> Vec<String> {
+            FieldDenCols::flatten_fields().unwrap()
         }
 
         fn generate_trace(

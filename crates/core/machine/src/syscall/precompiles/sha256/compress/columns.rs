@@ -10,6 +10,8 @@ use crate::{
         XorOperation,
     },
 };
+use sp1_columns::FlattenFields;
+use sp1_columns_core::FlattenFieldsHelper;
 
 pub const NUM_SHA_COMPRESS_COLS: usize = size_of::<ShaCompressCols<u8>>();
 
@@ -20,7 +22,7 @@ pub const NUM_SHA_COMPRESS_COLS: usize = size_of::<ShaCompressCols<u8>>();
 /// During init, the columns are initialized with the input values, one word at a time. During each
 /// compression cycle, one iteration of sha compress is computed. During finalize, the columns are
 /// combined and written back to memory.
-#[derive(AlignedBorrow, Default, Debug, Clone, Copy)]
+#[derive(AlignedBorrow, Default, Debug, Clone, Copy, FlattenFields)]
 #[repr(C)]
 pub struct ShaCompressCols<T> {
     /// Inputs.

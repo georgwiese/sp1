@@ -18,6 +18,9 @@ use sp1_core_executor::{
     syscalls::SyscallCode,
     ExecutionRecord, Program,
 };
+
+use sp1_columns::FlattenFields;
+use sp1_columns_core::FlattenFieldsHelper;
 use sp1_curves::{
     edwards::{ed25519::Ed25519BaseField, EdwardsParameters, NUM_LIMBS, WORDS_CURVE_POINT},
     params::{FieldParameters, Limbs, NumLimbs},
@@ -39,7 +42,7 @@ pub const NUM_ED_ADD_COLS: usize = size_of::<EdAddAssignCols<u8>>();
 /// A set of columns to compute `EdAdd` where a, b are field elements.
 /// Right now the number of limbs is assumed to be a constant, although this could be macro-ed
 /// or made generic in the future.
-#[derive(Debug, Clone, AlignedBorrow)]
+#[derive(Debug, Clone, AlignedBorrow, FlattenFields)]
 #[repr(C)]
 pub struct EdAddAssignCols<T> {
     pub is_real: T,
@@ -111,6 +114,10 @@ impl<F: PrimeField32, E: EllipticCurve + EdwardsParameters> MachineAir<F> for Ed
 
     fn name(&self) -> String {
         "EdAddAssign".to_string()
+    }
+
+    fn columns(&self) -> Vec<String> {
+        EdAddAssignCols::<F>::flatten_fields().unwrap()
     }
 
     fn generate_trace(

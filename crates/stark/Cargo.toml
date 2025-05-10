@@ -13,6 +13,8 @@ categories = { workspace = true }
 # sp1
 sp1-derive = { workspace = true }
 sp1-primitives = { workspace = true }
+sp1-columns = { workspace = true }
+sp1-columns-core = { workspace = true }
 
 # p3
 p3-air = { workspace = true }

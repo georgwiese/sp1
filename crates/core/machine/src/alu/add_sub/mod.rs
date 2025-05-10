@@ -9,6 +9,8 @@ use p3_air::{Air, AirBuilder, BaseAir};
 use p3_field::{AbstractField, PrimeField};
 use p3_matrix::{dense::RowMajorMatrix, Matrix};
 use p3_maybe_rayon::prelude::{ParallelBridge, ParallelIterator};
+use sp1_columns::FlattenFields;
+use sp1_columns_core::FlattenFieldsHelper;
 use sp1_core_executor::{
     events::{AluEvent, ByteLookupEvent, ByteRecord},
     ExecutionRecord, Opcode, Program,
@@ -37,7 +39,7 @@ pub const NUM_ADD_SUB_COLS: usize = size_of::<AddSubCols<u8>>();
 pub struct AddSubChip;
 
 /// The column layout for the chip.
-#[derive(AlignedBorrow, Default, Clone, Copy)]
+#[derive(AlignedBorrow, Default, Clone, Copy, FlattenFields)]
 #[repr(C)]
 pub struct AddSubCols<T> {
     /// The shard number, used for byte lookup table.
@@ -70,6 +72,10 @@ impl<F: PrimeField> MachineAir<F> for AddSubChip {
 
     fn name(&self) -> String {
         "AddSub".to_string()
+    }
+
+    fn columns(&self) -> Vec<String> {
+        AddSubCols::<F>::flatten_fields().unwrap()
     }
 
     fn generate_trace(
